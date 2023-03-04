@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: action/checkout@v1
+      - uses: actions/checkout@v1
       - name: npm install and build webpack
         run: |
           npm install
@@ -34,7 +34,7 @@ jobs:
     name: Build image and store in GitHub Container Registry
     steps:
       - name: Checkout
-        uses: action/checkout@v1
+        uses: actions/checkout@v1
       
       - name: Downloadbuilt-artifact
         uses: actions/download-artifact@main
@@ -47,14 +47,14 @@ jobs:
         with:
           registry: ${{env.IMAGE_REGISTRY_URL }}
           username: ${{ github.actor }}
-          password: ${{ secret.GITHUB_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
         
       - name: Extract metadata (tags, labels ) for Docker
         id: meta
         uses: docker/metadata-action@3.7.0
         with: 
           image: ${{env.IMAGE_REGISTRY_URL }}/${{ github.repository }}/${{env.DOCKER_IMAGE_NAME }}
-          tags:
+          tags: |
             type=sha, format=long,prefix=
         
       - name: Build and push Docker image
@@ -62,7 +62,7 @@ jobs:
         with:
           context: . 
           push: true
-          tags: ${{ steps.meta.outputs.tag }}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           
           
@@ -74,7 +74,7 @@ jobs:
       - name: "Login via Azure CLI"
         uses: azure/login@v1
         with:
-          creds: ${{ secrest.AZURE_CREDENTIALS }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
       - uses: azure/docker-login@v1
         with:
           login-server: ${{env.IMAGE_REGISTRY_URL}}
